@@ -63,7 +63,14 @@ class Builder: NSObject {
         request?.resume { (response, error) in
             
             let data = response?.data
-            data?.writeToFile(self.pathForFileName("assets.zip"), atomically: true)
+            do {
+                let assetsPath = self.pathForFileName("assets.zip")
+                data?.writeToFile(assetsPath, atomically: true)
+                try Zip.unzipFile(NSURL(fileURLWithPath: assetsPath), destination: NSURL(fileURLWithPath: self.pathForFileName("")), overwrite: true, password: nil, progress: nil)                
+            }
+            catch {
+                print("exception")
+            }
             print("got assets")
             dispatch_group_leave(self.dispatch_group)
         }
