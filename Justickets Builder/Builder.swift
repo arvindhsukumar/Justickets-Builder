@@ -60,13 +60,18 @@ class Builder: NSObject {
     func fetchAssets(url: String) {
         dispatch_group_enter(dispatch_group)
         let request = try? Pidgey.GET(url, queryParams: nil)
-        request?.resume { (response, error) in
+        request?.resume {
+            (response, error) in
             
             let data = response?.data
             do {
                 let assetsPath = self.pathForFileName("assets.zip")
-                data?.writeToFile(assetsPath, atomically: true)
-                try Zip.unzipFile(NSURL(fileURLWithPath: assetsPath), destination: NSURL(fileURLWithPath: self.pathForFileName("")), overwrite: true, password: nil, progress: nil)                
+                let assetsURL = NSURL(fileURLWithPath: assetsPath)
+                let destinationURL = NSURL(fileURLWithPath: self.pathForFileName(""))
+                    
+                data?.writeToURL(assetsURL, atomically: true)
+                try Zip.unzipFile(assetsURL, destination: destinationURL, overwrite: true, password: nil, progress: nil)
+                self.copyAppIcon()
             }
             catch {
                 print("exception")
